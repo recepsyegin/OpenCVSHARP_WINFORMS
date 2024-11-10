@@ -1,0 +1,34 @@
+// GAUSSIAN BLUR İÇİN
+
+private void button3_Click(object sender, EventArgs e)
+{
+    if (capture != null && capture.IsOpened())
+    {
+        isCameraRunning = true;
+
+        Task.Run(() =>
+        {
+            while (isCameraRunning && capture.IsOpened())
+            {
+                using (var frame = new Mat())
+                using (var smoothed = new Mat())
+                {
+                    capture.Read(frame);
+
+                    if (!frame.Empty())
+                    {
+                        OpenCvSharp.Size size = new OpenCvSharp.Size(15, 15);
+                        Cv2.Blur(frame, smoothed, size);
+
+                        // Form ana iş parçacığına göndermek için Invoke kullanılır
+                        Invoke(new Action(() =>
+                        {
+                            pictureBox3.Image?.Dispose();
+                            pictureBox3.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(smoothed);
+                        }));
+                    }
+                }
+            }
+        });
+    }
+}
